@@ -1,25 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment, Suspense, lazy } from 'react';
+import { BrowserRouter, Route } from 'react-router-dom';
+import { ThemeProvider, createGlobalStyle } from 'styled-components';
+import ayTheme from './styles/theme';
+import Header from './components/header'
 
-function App() {
+const Home = lazy(() => import('./views/home'));
+
+
+const themeToCss = theme => {
+  const vars = Object.entries(theme).map(t => `--${t[0]}:${t[1]}`);
+  return vars.join(';');
+};
+
+const GlobalStyle = createGlobalStyle`
+  :root{
+    ${props => themeToCss(props.theme)};
+  }
+`;
+const App = () => {
+  const theme = Object.assign(ayTheme);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Fragment>
+        <GlobalStyle theme={theme} />
+        <Suspense fallback={null}>
+          <BrowserRouter>
+            <Fragment>
+              <Header theme={theme.default} />
+              <Route exact path="/" component={Home} />
+            </Fragment>
+          </BrowserRouter>
+        </Suspense>
+      </Fragment>
+    </ThemeProvider>
   );
 }
 
